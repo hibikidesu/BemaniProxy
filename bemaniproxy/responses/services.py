@@ -1,7 +1,5 @@
 from bemaniproxy.ea.node import Node
-
-url_names = ["cardmng", "dlstatus", "eacoin", "facility", "message", "package", "pcbevent", "pcbtracker", "pkglist",
-             "posevent", "lobby", "lobby2", "local", "local2", "apsmanager", "netlog"]
+from bemaniproxy.ea import MODULES
 
 
 def item(name: str, url: str) -> Node:
@@ -18,7 +16,7 @@ def create_services(data: Node, extra: dict) -> Node:
     root.set_attribute("mode", "operation")
     root.set_attribute("product_domain", "1")
 
-    for name in url_names:
+    for name in MODULES:
         root.add_child(item(name, "http://{}:{}/".format(extra.get("host"), extra.get("port"))))
 
     root.add_child(item("ntp", "ntp://pool.ntp.org/"))

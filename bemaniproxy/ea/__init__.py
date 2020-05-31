@@ -29,7 +29,9 @@ MODULES = [
     "local2",
     "lobby",
     "lobby2",
-    "KFC"
+    "KFC",
+    "apsmanager",
+    "netlog"
 ]
 
 
