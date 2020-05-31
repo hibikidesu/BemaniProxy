@@ -2,10 +2,13 @@ import binascii
 import hashlib
 from typing import Optional
 
-from .lz77 import Lz77
+from arc4 import ARC4
+from kbinxml import KBinXML
+
 from .binary import BinaryEncoding
-from .xml import XmlEncoding
+from .lz77 import Lz77
 from .node import Node
+from .xml import XmlEncoding
 
 
 class EAmuseException(Exception):
@@ -18,7 +21,7 @@ class EAmuseProtocol:
     """
     A wrapper object that encapsulates encoding/decoding the E-Amusement protocol by Konami.
     """
-    SHARED_SECRET = b'\x69\xD7\x46\x27\xD9\x85\xEE\x21\x87\x16\x15\x70\xD0\x8D\x93\xB1\x24\x55\x03\x5B\x6D\xF0\xD8\x20\x5D\xF5'
+    SHARED_SECRET = b"\x69\xD7\x46\x27\xD9\x85\xEE\x21\x87\x16\x15\x70\xD0\x8D\x93\xB1\x24\x55\x03\x5B\x6D\xF0\xD8\x20\x5D\xF5"
 
     XML = 1
     BINARY = 2
@@ -46,24 +49,7 @@ class EAmuseProtocol:
         Returns:
             binary string representing the encrypted/decrypted data
         """
-        S = list(range(256))
-        j = 0
-        out = []
-
-        # KSA Phase
-        for i in range(256):
-            j = (j + S[i] + key[i % len(key)]) & 0xFF
-            S[i], S[j] = S[j], S[i]
-
-        # PRGA Phase
-        i = j = 0
-        for char in data:
-            i = (i + 1) & 0xFF
-            j = (j + S[i]) & 0XFF
-            S[i], S[j] = S[j], S[i]
-            out.append(char ^ S[(S[i] + S[j]) & 0xFF])
-
-        return bytes(out)
+        return ARC4(key).decrypt(data)
 
     def __decrypt(self, encryption_key: str, data: bytes) -> bytes:
         """
@@ -83,8 +69,8 @@ class EAmuseProtocol:
 
         if encryption_key:
             # Key is concatenated with the shared secret above
-            version, first, second = encryption_key.split('-')
-            key = binascii.unhexlify((first + second).encode('ascii')) + EAmuseProtocol.SHARED_SECRET
+            version, first, second = encryption_key.split("-")
+            key = binascii.unhexlify((first + second).encode("ascii")) + EAmuseProtocol.SHARED_SECRET
 
             # Next, key is sent through MD5 to derive the real key
             m = hashlib.md5()
@@ -133,15 +119,15 @@ class EAmuseProtocol:
             return None
 
         if compression:
-            if compression is None or compression == 'none':
+            if compression is None or compression == "none":
                 # This isn't compressed
                 return data
-            elif compression == 'lz77':
+            elif compression == "lz77":
                 # This is a compressed new-style packet
                 lz = Lz77()
                 return lz.decompress(data)
             else:
-                raise EAmuseException(f'Unknown compression {compression}')
+                raise EAmuseException(f"Unknown compression {compression}")
 
         # No compression
         return data
@@ -163,15 +149,15 @@ class EAmuseProtocol:
             return None
 
         if compression:
-            if compression is None or compression == 'none':
+            if compression is None or compression == "none":
                 # This isn't compressed
                 return data
-            elif compression == 'lz77':
+            elif compression == "lz77":
                 # This is a compressed new-style packet
                 lz = Lz77()
                 return lz.compress(data)
             else:
-                raise EAmuseException(f'Unknown compression {compression}')
+                raise EAmuseException(f"Unknown compression {compression}")
 
         # No compression
         return data
@@ -197,6 +183,11 @@ class EAmuseProtocol:
 
             return ret
 
+        try:
+            data = KBinXML(data)
+        except:
+            pass
+
         # Assume its XML
         xml = XmlEncoding()
         ret = xml.decode(data, skip_on_exceptions=True)
@@ -209,7 +200,7 @@ class EAmuseProtocol:
             return ret
 
         # Couldn't decode
-        raise EAmuseException('Unknown packet encoding')
+        raise EAmuseException("Unknown packet encoding")
 
     def __encode(self, tree: Node, text_encoding: str, packet_encoding: int) -> bytes:
         """
@@ -256,12 +247,12 @@ class EAmuseProtocol:
         return self.__decode(data)
 
     def encode(
-        self,
-        compression: Optional[str],
-        encryption: Optional[str],
-        tree: Node,
-        text_encoding: Optional[str]=None,
-        packet_encoding: Optional[int]=None,
+            self,
+            compression: Optional[str],
+            encryption: Optional[str],
+            tree: Node,
+            text_encoding: Optional[str] = None,
+            packet_encoding: Optional[int] = None,
     ) -> bytes:
         """
         Given a response with optional compression and encryption set, encode, compress

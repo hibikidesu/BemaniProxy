@@ -2,8 +2,8 @@ import copy
 import struct
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
-from .stream import InputStream
 from .node import Node
+from .stream import InputStream
 
 
 class XmlEncodingException(Exception):
@@ -59,7 +59,7 @@ class XmlDecoder:
             # Get the data value
             type_int = Node.typename_to_type(data_type)
             if type_int is None:
-                raise XmlEncodingException(f'Invalid node type {data_type} for node {tag.decode("ascii")}')
+                raise XmlEncodingException('Invalid node type {} for node {}'.format(data_type, tag.decode('ascii')))
 
             node = Node(name=tag.decode('ascii'), type=type_int, array=array)
 
@@ -84,7 +84,7 @@ class XmlDecoder:
         node = self.current.pop()
 
         if node.name != tag.decode('ascii'):
-            raise Exception(f'Logic error, expected {tag.decode("ascii")} but got {node.name}')
+            raise Exception('Logic error, expected {} but got {}'.format(tag.decode('ascii'), node.name))
 
         if len(self.current) == 0:
             self.root = node
@@ -148,9 +148,11 @@ class XmlDecoder:
                 # Remove any spaces first
                 value = ''.join([c for c in value if not c.isspace()])
                 if self.current[-1].value is None:
-                    self.current[-1].set_value(b''.join([hex_to_bin(value[i:(i + 2)]) for i in range(0, len(value), 2)]))
+                    self.current[-1].set_value(
+                        b''.join([hex_to_bin(value[i:(i + 2)]) for i in range(0, len(value), 2)]))
                 else:
-                    self.current[-1].set_value(self.current[-1].value + b''.join([hex_to_bin(value[i:(i + 2)]) for i in range(0, len(value), 2)]))
+                    self.current[-1].set_value(self.current[-1].value + b''.join(
+                        [hex_to_bin(value[i:(i + 2)]) for i in range(0, len(value), 2)]))
             elif data_type == 'ip4':
                 # Do nothing, already fine
                 self.current[-1].set_value(value)
@@ -344,7 +346,7 @@ class XmlEncoder:
         self.encoding = encoding
 
     def get_data(self) -> bytes:
-        magic = f'<?xml version="1.0" encoding="{self.encoding}"?>'.encode('ascii')
+        magic = '<?xml version="1.0" encoding="{}"?>'.format(self.encoding).encode('ascii')
         payload = self.to_xml(self.tree)
 
         return magic + payload
@@ -372,7 +374,7 @@ class XmlEncoder:
             attrs_dict['__type'] = node.data_type
             order.insert(0, '__type')
 
-        def escape(val: Any, attr: bool=False) -> bytes:
+        def escape(val: Any, attr: bool = False) -> bytes:
             if isinstance(val, str):
                 val = val.replace('&', '&amp;')
                 val = val.replace('<', '&lt;')
@@ -388,7 +390,8 @@ class XmlEncoder:
                 return str(val).encode('ascii')
 
         if attrs_dict:
-            attrs = b' ' + b' '.join([b''.join([attr.encode('ascii'), b'="', escape(attrs_dict[attr], attr=True), b'"']) for attr in order])
+            attrs = b' ' + b' '.join(
+                [b''.join([attr.encode('ascii'), b'="', escape(attrs_dict[attr], attr=True), b'"']) for attr in order])
         else:
             attrs = b''
 
@@ -491,7 +494,7 @@ class XmlEncoding:
         encoding = encoding.replace('_', '-')
         return encoding
 
-    def decode(self, data: bytes, skip_on_exceptions: bool=False) -> Optional[Node]:
+    def decode(self, data: bytes, skip_on_exceptions: bool = False) -> Optional[Node]:
         """
         Given a data blob, decode the data with the current encoding. Will set
         the class property value 'encoding' to the encoding used on the last
@@ -519,7 +522,7 @@ class XmlEncoding:
             else:
                 raise
 
-    def encode(self, tree: Node, encoding: Optional[str]=None) -> bytes:
+    def encode(self, tree: Node, encoding: Optional[str] = None) -> bytes:
         """
         Given a tree of Node objects, encode the data with the current encoding.
 
@@ -540,7 +543,7 @@ class XmlEncoding:
         encoding = self.__fix_encoding(encoding)
         if encoding not in XmlEncoding.ACCEPTED_ENCODINGS:
             # XML pages only support shift-jis
-            raise XmlEncodingException(f"Invalid text encoding {encoding}")
+            raise XmlEncodingException("Invalid text encoding {}".format(encoding))
 
         xml = XmlEncoder(tree, encoding)
         return xml.get_data()

@@ -1,8 +1,9 @@
 import socket
 import threading
+import traceback
 from .responses import *
-from .protocol import EAmuseProtocol
-from .node import Node
+from bemaniproxy.ea.protocol import EAmuseProtocol
+from bemaniproxy.ea.node import Node
 try:
     from http_parser.parser import HttpParser
 except ImportError:
@@ -59,9 +60,15 @@ class Proxy:
             print("No handle for {}".format(data.name))
             return req
 
-        return request_handle(req, {
-            "url": "{}:{}".format(self.host, self.port)
+        resp = request_handle(req, {
+            "host": self.host,
+            "port": self.port
         })
+        root = Node.void("response")
+        resp.set_attribute("status", "0")
+        root.add_child(resp)
+
+        return root
 
     def _parse_server_data(self, data: bytes) -> bytes:
         """
@@ -81,26 +88,27 @@ class Proxy:
         compression = headers.get("X-Compress")
 
         protocol = EAmuseProtocol()
-        req = protocol.decode(compression, key, body)
+        try:
+            req = protocol.decode(compression, key, body)
+        except:
+            print("Failed to decode")
+            return data
         if req is None:
             print("Failed to decode")
             return data
 
         # Send response
-        root = Node.void("response")
-        new_out = self._handle_request(req)
-        new_out.set_attribute("status", "0")
-        root.add_child(new_out)
+        root = self._handle_request(req)
 
         # Create headers
-        response = "HTTP/1.1 200 OK\n"
+        response = "HTTP/1.1 200 OK\r\n"
         if compression:
-            response += "X-Compress: {}\n".format(compression)
+            response += "X-Compress: {}\r\n".format(compression)
         else:
-            response += "X-Compress: none\n"
+            response += "X-Compress: none\r\n"
         if key:
-            response += "X-Eamuse-Info: {}\n".format(key)
-        response += "\n"
+            response += "X-Eamuse-Info: {}\r\n".format(key)
+        response += "\r\n"
         response = response.encode()
 
         # Encode and send body

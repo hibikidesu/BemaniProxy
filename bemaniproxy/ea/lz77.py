@@ -37,7 +37,7 @@ class Lz77Decompress:
         self.pending_copy_pos: int = 0
         self.pending_copy_max: int = 0
         self.ringlength: int = backref or self.RING_LENGTH
-        self.ring: bytes = b'\x00' * self.ringlength
+        self.ring: bytes = b"\x00" * self.ringlength
 
     def __ring_read(self, copy_pos: int, copy_len: int) -> Generator[bytes, None, None]:
         """
@@ -159,7 +159,7 @@ class Lz77Decompress:
             self.eof = True
             return
         if self.left == 1:
-            raise LzException('Unexpected EOF mid-backref')
+            raise LzException("Unexpected EOF mid-backref")
 
         hi = self.data[self.read_pos]
         lo = self.data[self.read_pos + 1]
@@ -373,7 +373,7 @@ class Lz77:
             Raw binary data.
         """
         lz = Lz77Decompress(data, backref=self.backref)
-        return b''.join(lz.decompress_bytes())
+        return b"".join(lz.decompress_bytes())
 
     def compress(self, data: bytes) -> bytes:
         """
@@ -386,4 +386,4 @@ class Lz77:
             L7zz-compressed binary data.
         """
         lz = Lz77Compress(data, backref=self.backref)
-        return b''.join(lz.compress_bytes())
+        return b"".join(lz.compress_bytes())
