@@ -7,7 +7,6 @@ from .node import Node
 __all__ = [
     "generate_header",
     "generate_card",
-    "generate_message_maint",
     "convert_game_to_user_id",
     "convert_user_id_to_game"
 ]
@@ -22,26 +21,6 @@ def generate_header():
 
 def generate_card():
     return "E004{}".format(hexlify(os.urandom(6)).decode().upper())
-
-
-def generate_message_maint():
-    n = Node.void("response")
-    m = Node.void("message")
-
-    def i(name: str):
-        x = Node.void("item")
-        x.set_attribute("end", "86400")
-        x.set_attribute("name", name)
-        x.set_attribute("start", "0")
-        return x
-
-    m.add_child(i("sys.mainte"))
-    m.add_child(i("sys.eacoin.mainte"))
-
-    m.set_attribute("expire", "300")
-    m.set_attribute("status", "0")
-    n.add_child(m)
-    return n
 
 
 def convert_game_to_user_id(game_id: str):

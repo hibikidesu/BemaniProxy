@@ -5,7 +5,6 @@ from enum import Enum
 __all__ = [
     "get_version_string",
     "generate_card",
-    "generate_message_maint",
     "generate_header",
     "MODULES",
     "Status"
