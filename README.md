@@ -4,27 +4,26 @@
 Adds the ablity to record your stats, track progress, enable flags from which the server does not provide.
 This is not made for editing outbound data.
 
-## Requirements
-- [Python 3](https://www.python.org/downloads/)
-
-## Installation
-
-```bash
-pip install git+https://github.com/hibikidesu/BemaniProxy.git
-```
-
-or download this repo and run `<python3 interpreter> setup.py install`
-
 ## Usage
 
-Run the proxy with 
+- Download Python 3
+- Download this repo
+- run `<python3 interpreter> -m pip install -Ur requirements.txt`
+- run `uwsgi --ini bemaniproxy.ini`
 
-```bash
-bemaniproxy example.com
-```
-
-Set your server url on your game to http://ip:port displayed on proxy launch
+Edit the config.json in this directory and enter your server url. Set your game url to http://YOURIP:8050
 
 A web server will also be running which you can access with your web browser which records your data
 
-A sqlite db file will be used or created at your current working directory.
+## Features
+
+- Unlimited Paseli
+- Score tracking (sdvx5)
+- Shop name change locally (not server side)
+
+## TODO
+- opcheckin
+- iidx support
+- sdvx<5 support
+- support for songs rejected by server (eac songs etc)
+- pcbevents

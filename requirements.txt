@@ -1,4 +1,5 @@
 flask
-http-parser
+requests
 arc4
 kbinxml
+uwsgi

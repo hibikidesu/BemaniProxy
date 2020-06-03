@@ -1,7 +1,6 @@
-from .proxy import *
-import sys
+from bemaniproxy.proxy import *
 
 
 def run():
-    proxy = Proxy(host=get_host_address(), port=8050, game_server=sys.argv[1])
-    proxy.run()
+    """Main entry, runs flask debug server"""
+    app.run("0.0.0.0", 8050)
