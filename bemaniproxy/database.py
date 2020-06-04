@@ -115,8 +115,6 @@ class Database:
                   "time INTEGER NOT NULL, "
                   "user TEXT, "
                   "data TEXT)")
-        c.execute("CREATE TABLE IF NOT EXISTS users_sdvx ("
-                  ")")
         self.db.commit()
         c.close()
 
