@@ -140,7 +140,9 @@ def handle_game(decoded: Node) -> Node:
     print("> {}".format(decoded.children[0].name))
     return handle_data(decoded, {
         "eacoin": create_eacoin_request,
-        "game": create_game_request
+        "game": create_game_request,
+        "game_2": create_game_request,  # SDVX2
+        "game_3": create_game_request   # SDVX3, museca
     })
 
 
