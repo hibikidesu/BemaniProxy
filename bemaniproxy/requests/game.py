@@ -8,7 +8,7 @@ def save_sv_game(game: Node, version: str):
     db = get_db()
     db.save_game(
         game_version=game_ver.get_version_string(Model.from_modelstring(version)),
-        card_id=game.child_value("dataid"),
+        refid=game.child_value("dataid"),
         song_id=game.child_value("music_id"),
         music_type=game.child_value("music_type"),
         mode=game.child_value("mode"),
@@ -31,11 +31,10 @@ def create_game_request(data: Node, config: dict):
     method = data.children[0].attribute("method")
 
     if method == "sv5_save_m":      # SDVX 5 song save request
-        save_sv_game(data.child("game"), data.attribute("version"))
+        save_sv_game(data.child("game"), data.attribute("model"))
     elif method == "sv4_save_m":    # SDVX 4
-        save_sv_game(data.child("game"), data.attribute("version"))
+        save_sv_game(data.child("game"), data.attribute("model"))
     elif method == "save_m":        # <4
-        save_sv_game(data.child("game"), data.attribute("version"))
+        save_sv_game(data.children[0], data.attribute("model"))
 
-    print(method)
     return data

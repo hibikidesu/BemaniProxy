@@ -1,6 +1,7 @@
 from flask import Flask, g, request, Response
 import requests
 import json
+import traceback
 
 from bemaniproxy.database import Database
 from bemaniproxy.responses import *
@@ -46,6 +47,8 @@ def on_post(path: str):
     g.incoming: Node = decoded  # Some response methods may need to use this since the server may not send what we need
     modified_game = handle_game(decoded)
     if modified_game is not None:
+        if modified_game.children[0].name == "eacoin":
+            print(modified_game)
         to_server = protocol.encode(
             compression=compression,
             encryption=encryption,
@@ -124,8 +127,12 @@ def respond_encoded(data: bytes, compression: str = None, encryption: str = None
 def handle_data(data: Node, handles: dict):
     handle = handles.get(data.children[0].name)
     if handle:
-        resp = handle(data, CONFIG)
-        if data == resp:
+        try:
+            resp = handle(data, CONFIG)
+        except:
+            traceback.print_exc()
+            return None
+        if str(data) == str(resp):
             return None
         if resp.name == data.name:
             return resp
@@ -140,6 +147,8 @@ def handle_game(decoded: Node) -> Node:
     print("> {}".format(decoded.children[0].name))
     return handle_data(decoded, {
         "eacoin": create_eacoin_request,
+        "pcbevent": create_pcbevent_request,
+        "cardmng": create_cardmng_request,
         "game": create_game_request,
         "game_2": create_game_request,  # SDVX2
         "game_3": create_game_request   # SDVX3, museca
@@ -152,8 +161,7 @@ def handle_server(decoded: Node) -> Node:
         "services": create_services_response,
         "facility": create_facility_response,
         "eacoin": create_eacoin_response,
-        "game": create_game_response,
-        "pcbevent": create_pcbevent_response
+        "game": create_game_response
     })
 
 
