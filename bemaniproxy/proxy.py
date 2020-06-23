@@ -3,7 +3,6 @@ import requests
 import json
 import traceback
 
-from bemaniproxy.database import Database
 from bemaniproxy.responses import *
 from bemaniproxy.requests import *
 from bemaniproxy.ea.protocol import EAmuseProtocol
@@ -42,7 +41,7 @@ def on_post(path: str):
         encryption=encryption,
         data=request.data
     )
-    g.incoming: Node = decoded  # Some response methods may need to use this since the server may not send what we need
+    g.incoming = decoded  # Some response methods may need to use this since the server may not send what we need
     modified_game = handle_game(decoded)
     if modified_game is not None:
         to_server = protocol.encode(
@@ -158,7 +157,8 @@ def handle_server(decoded: Node) -> Node:
         "services": create_services_response,
         "facility": create_facility_response,
         "eacoin": create_eacoin_response,
-        "game": create_game_response
+        "game": create_game_response,
+        "pcbtracker": create_pcbtracker_response
     })
 
 

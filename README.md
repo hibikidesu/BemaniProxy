@@ -20,6 +20,7 @@ A web server will also be running which you can access with your web browser whi
 - Unlimited Paseli
 - Score tracking (sdvx5)
 - Shop name change locally (not server side)
+- paseli force disable
 
 ## TODO
 - opcheckin
