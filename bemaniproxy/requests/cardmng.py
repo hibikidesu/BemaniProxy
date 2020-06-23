@@ -7,4 +7,4 @@ def create_cardmng_request(data: Node, config: dict):
 
 
 
-    return data
+    return None

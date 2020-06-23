@@ -13,4 +13,4 @@ def create_pcbevent_request(data: Node, config: dict):
                 data=item.child_value("value")
             )
 
-    return data
+    return None

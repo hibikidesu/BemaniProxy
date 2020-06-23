@@ -1,5 +1,4 @@
 from bemaniproxy.ea.node import Node
-from bemaniproxy.database import get_db
 
 
 def create_eacoin_request(data: Node, config: dict):
@@ -11,5 +10,5 @@ def create_eacoin_request(data: Node, config: dict):
             service = data.child("eacoin/service")
             service.set_value(payment.value)
             payment.set_value(0)
-    print(data)
-    return data
+            return data
+    return None

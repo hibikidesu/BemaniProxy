@@ -28,4 +28,4 @@ def create_game_response(data: Node, config: dict):
                 vol_rate=param[9]
             )
 
-    return data
+    return None

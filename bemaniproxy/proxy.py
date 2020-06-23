@@ -36,8 +36,6 @@ def on_post(path: str):
     if request.query_string is not None and len(request.query_string) > 0:
         actual_path = actual_path + "?{}".format(request.query_string.decode("ascii"))
 
-    print("Handling")
-
     # Decode the data
     decoded = protocol.decode(
         compression=compression,
@@ -47,15 +45,13 @@ def on_post(path: str):
     g.incoming: Node = decoded  # Some response methods may need to use this since the server may not send what we need
     modified_game = handle_game(decoded)
     if modified_game is not None:
-        if modified_game.children[0].name == "eacoin":
-            print(modified_game)
         to_server = protocol.encode(
             compression=compression,
             encryption=encryption,
             tree=modified_game
         )
     else:
-        to_server = None
+        to_server = request.data
 
     # Send to game server and receive data
     headers = {
@@ -72,7 +68,7 @@ def on_post(path: str):
         method="POST",
         url=CONFIG.get("server") + actual_path,
         headers=headers,
-        data=to_server if to_server is not None else request.data
+        data=to_server
     ).prepare()
     sess = requests.Session()
     server_response = sess.send(prep_req, timeout=60)
@@ -102,10 +98,10 @@ def on_post(path: str):
             tree=modified_server
         )
     else:
-        to_game = None
+        to_game = server_response.content
 
     return respond_encoded(
-        to_game if to_game is not None else server_response.content,
+        to_game,
         compression=resp_compression,
         encryption=resp_encryption
     )
@@ -132,7 +128,7 @@ def handle_data(data: Node, handles: dict):
         except:
             traceback.print_exc()
             return None
-        if str(data) == str(resp):
+        if resp is None:
             return None
         if resp.name == data.name:
             return resp
@@ -140,6 +136,7 @@ def handle_data(data: Node, handles: dict):
         resp.set_attribute("status", "0")
         root.add_child(resp)
         return root
+    print("No method")
     return None
 
 

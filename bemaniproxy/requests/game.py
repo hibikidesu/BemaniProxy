@@ -37,4 +37,4 @@ def create_game_request(data: Node, config: dict):
     elif method == "save_m":        # <4
         save_sv_game(data.children[0], data.attribute("model"))
 
-    return data
+    return None
