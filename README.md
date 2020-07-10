@@ -26,5 +26,4 @@ A web server will also be running which you can access with your web browser whi
 - opcheckin
 - iidx support
 - sdvx<5 support
-- support for songs rejected by server (eac songs etc)
 - pcbevents

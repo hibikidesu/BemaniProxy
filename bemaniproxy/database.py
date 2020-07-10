@@ -11,6 +11,13 @@ class Database:
         self.db = sqlite3.connect("bemaniproxy.db")
         self.setup()
 
+    def get_scores(self, game_version, refid: str) -> list:
+        c = self.db.cursor()
+        c.execute("SELECT * FROM scores WHERE refid = ? AND game = ?", (refid, game_version.name))
+        data = c.fetchall()
+        c.close()
+        return data
+
     def save_game(self, game_version, refid: str, *,
                   song_id: int = 0, mode: int = 0, score: int = 0, clear_type: int = 0, grade: int = 0,
                   max_chain: int = 0, critical: int = 0, near: int = 0, error: int = 0, effective_rate: int = 0,
